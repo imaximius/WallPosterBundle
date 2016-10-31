@@ -1,20 +1,14 @@
 {
-    "name": "dario_swain/wall-poster-bundle",
+    "name": "imaximius/wall-poster-bundle",
     "type": "symfony-bundle",
     "description": "Wall posting for social groups",
     "keywords": ["post", "wall", "bundle", "social", "vk", "facebook", "twitter"],
-    "homepage": "https://github.com/DarioSwain/WallPosterBundle",
+    "homepage": "https://github.com/imaximius/WallPosterBundle",
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Ilya Pokamestov",
-            "email": "dario_swain@yahoo.com"
-        }
-    ],
     "require": {
         "php":                  ">=5.3.2",
         "ext-curl" :            "*",
-        "symfony/symfony":      "2.*",
+        "symfony/symfony":      "3.*",
         "facebook/php-sdk-v4" : "4.0.*",
         "dg/twitter-php":       "3.3"
     },
