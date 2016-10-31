@@ -66,7 +66,7 @@ class VkProvider extends Provider
 		$groupPost = $this->makeApiRequest('wall.post',array(
 			'owner_id' => -$this->groupId,
 			'from_group' => 1,
-			'message' => $post->getMessage().$post->getSocialTagsText(),
+			'message' => $post->getMessage().' '.$post->getSocialTagsText(),
 			'attachments' => $this->prepareAttachments($post),
 		));
 
