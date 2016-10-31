@@ -92,7 +92,7 @@ class VkProvider extends Provider
 			/** @var PostImage $image */
             foreach($post->getImages() as $image)
             {
-                $uploadedPhoto = json_decode($this->request($uploadURL,array('photo' => '@'.$image->getFilePath())));
+		$uploadedPhoto = json_decode($this->request($uploadURL, array('photo' => curl_file_create($image->getFilePath()))));
                 $savedImage = $this->makeApiRequest('photos.saveWallPhoto', array(
                     'group_id' => $this->groupId,
                     'photo' => $uploadedPhoto->photo,

@@ -3,6 +3,14 @@ WallPosterBundle
 
 The **WallPosterBundle** bundle allows you to post your site news in your social groups, pages or timelines.
 
+Getting acces_token from Vkontakte
+------------
+First step:
+https://oauth.vk.com/authorize?client_id=<APPLICATION_ID>&display=page&redirect_uri=https://api.vk.com/blank.html&scope=groups,wall,offline,photos&response_type=code&v=5.59
+
+Second step 
+https://oauth.vk.com/access_token?client_id=<APPLICATION_ID>&client_secret=<APPLICATION_SECRET>&redirect_uri=https://api.vk.com/blank.html&code=<CODE FROM FIRST STEP>
+
 Installation
 ------------
 
