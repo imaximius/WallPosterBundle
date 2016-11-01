@@ -11,6 +11,10 @@ https://oauth.vk.com/authorize?client_id=[APPLICATION_ID]&display=page&redirect_
 Second step 
 https://oauth.vk.com/access_token?client_id=[APPLICATION_ID]&client_secret=[APPLICATION_SECRET]&redirect_uri=https://api.vk.com/blank.html&code=[CODE FROM FIRST STEP]
 
+Get access_token from Facebook 
+------------
+Use this tool for geting token - https://developers.facebook.com/tools/explorer/185876601823032
+
 Installation
 ------------
 
