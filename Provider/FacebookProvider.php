@@ -39,43 +39,39 @@ class FacebookProvider extends Provider
 		}
 	}
 
-	public function publish(Post $post)
+    public function publish(Post $post)
+    {
+	if($this->facebookSession)
 	{
-		if($this->facebookSession)
-		{
-			//TODO: Handle errors
-			$facebookRequest = new FacebookRequest($this->facebookSession,'POST','/'.$this->page.'/feed',$this->prepareAttachments($post));
-			/** @var GraphObject $graphObject */
-			try
-			{
-				$graphObject = $facebookRequest->execute()->getGraphObject();
-				return $graphObject->getProperty('id');
-			}
-			catch(\Exception $ex)
-			{
-				//TODO:Notify about exception
-				return false;
-			}
-		}
-		return false;
-	}
+	    if($post->getImages())
+	    {
+		$images = $post->getImages();
+		foreach($images as $image) {
+		    $facebookImageRequest = new FacebookRequest(
+			    $this->facebookSession,
+			    'POST',
+			    '/'.$this->page.'/photos',
+			    [
+				'url' => $image->getBrowserUrl(),
+				'caption' => $post->getMessage()
+			    ]
+		    );
 
-	//TODO: If image available, and link not found then post only image with title message
-	protected function prepareAttachments(Post $post)
-	{
-		$attachments = array();
-		$attachments['message'] = $post->getMessage();
-		if($post->getLink())
-		{
-			$attachments['link'] = $post->getLink();
-		}
-		//TODO: Image web path required
-		if($post->getImages())
-		{
-			$images = $post->getImages();
-			$attachments['picture'] = array_shift($images);
-		}
-		return $attachments;
-	}
+		    /** @var GraphObject $graphObject */
+		    try
+		    {
+			$graphImageObject = $facebookImageRequest->execute()->getGraphObject();
+			$imageId = $graphImageObject->getProperty('id');
 
+			return $imageId;
+		    }
+		    catch(\Exception $ex)
+		    {
+			return $ex->getMessage();
+		    }
+		}
+	    }
+	}
+	return false;
+    }
 } 
