@@ -13,7 +13,11 @@ https://oauth.vk.com/access_token?client_id=[APPLICATION_ID]&client_secret=[APPL
 
 Get access_token from Facebook 
 ------------
+First step 
 Use this tool for geting token - https://developers.facebook.com/tools/explorer/185876601823032
+
+Second step 
+Get longlive access_token by sending - curl -X GET 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=[CLIENT_ID]&client_secret=[CLIENT_SECRET]&fb_exchange_token=[SHORT_LIVE_TOKEN_FROM_PREVIUOS_STEP]'
 
 Installation
 ------------
