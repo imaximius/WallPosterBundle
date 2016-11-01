@@ -73,7 +73,7 @@ class VkProvider extends Provider
 		//TODO: Fire event after send wall.post request
 		$post->addPublishInformation(WallPosterBundle::VK_PROVIDER, $groupPost);
 
-		return $post;
+		return $groupPost;
     }
 
 	/**
