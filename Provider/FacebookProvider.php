@@ -68,7 +68,7 @@ class FacebookProvider extends Provider
                 [
                     'picture' => implode(',', $postImages),
                     'message' => $post->getMessage(),
-                    'link' => $post->getLink(),
+                    'link' => $post->getLink()->getUrl(),
                 ]
             );
 
@@ -111,7 +111,7 @@ class FacebookProvider extends Provider
                 [
                     'picture' => implode(',', $postImages),
                     'message' => $post->getMessage(),
-                    'link' => $post->getLink(),
+                    'link' => $post->getLink()->getUrl(),
                 ]
             );
 
