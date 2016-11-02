@@ -59,4 +59,13 @@ abstract class Provider
 	 * @return Post
 	 */
 	abstract public function publish(Post $post);
+
+    /**
+     * Public post to social network
+     *
+     * @param Post $post
+     * @param      $id
+     * @return \WallPosterBundle\Post\Post
+     */
+    abstract public function edit(Post $post, $id);
 } 

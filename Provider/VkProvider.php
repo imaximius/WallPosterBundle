@@ -26,112 +26,145 @@ class VkProvider extends Provider
 
     const API_URL = 'https://api.vk.com/method/';
 
-	/** @var  string */
+    /** @var  string */
     protected $accessToken;
-	/** @var  string */
+    /** @var  string */
     protected $apiVersion;
-	/** @var  string */
+    /** @var  string */
     protected $lang;
-	/** @var  string */
+    /** @var  string */
     protected $groupId;
-	/** @var  CaptchaHandler */
-	protected $captchaHandler;
+    /** @var  CaptchaHandler */
+    protected $captchaHandler;
 
-	/**
-	 * @param string $accessToken
-	 * @param string $groupId
-	 * @param string $apiVersion
-	 * @param string $lang
-	 * @param CaptchaHandler $captchaHandler
-	 */
-	public function __construct($accessToken, $groupId, $apiVersion, $lang, CaptchaHandler $captchaHandler)
+    /**
+     * @param string $accessToken
+     * @param string $groupId
+     * @param string $apiVersion
+     * @param string $lang
+     * @param CaptchaHandler $captchaHandler
+     */
+    public function __construct($accessToken, $groupId, $apiVersion, $lang, CaptchaHandler $captchaHandler)
     {
         $this->accessToken = $accessToken;
         $this->apiVersion = $apiVersion;
         $this->lang = $lang;
-        $this->groupId = (int)$groupId;
-		$this->captchaHandler = $captchaHandler;
+        $this->groupId = (int) $groupId;
+        $this->captchaHandler = $captchaHandler;
     }
 
-	/** {@inheritdoc} */
+    /**
+     * {@inheritdoc}
+     */
     public function publish(Post $post)
     {
-		if($this->captchaHandler->isCaptchaRequire() && !$this->captchaHandler->getCaptchaValue())
-		{
-			return false;
-		}
+        if ($this->captchaHandler->isCaptchaRequire() && !$this->captchaHandler->getCaptchaValue()) {
+            return false;
+        }
 
-		//TODO: Fire event before send wall.post request
+        //TODO: Fire event before send wall.post request
 
-		$groupPost = $this->makeApiRequest('wall.post',array(
-			'owner_id' => -$this->groupId,
-			'from_group' => 1,
-			'message' => $post->getMessage().' '.$post->getSocialTagsText(),
-			'attachments' => $this->prepareAttachments($post),
-		));
+        $groupPost = $this->makeApiRequest(
+            'wall.post',
+            [
+                'owner_id' => -$this->groupId,
+                'from_group' => 1,
+                'message' => $post->getMessage().' '.$post->getSocialTagsText(),
+                'attachments' => $this->prepareAttachments($post),
+            ]
+        );
 
-		//TODO: Fire event after send wall.post request
-		$post->addPublishInformation(WallPosterBundle::VK_PROVIDER, $groupPost);
+        //TODO: Fire event after send wall.post request
+        $post->addPublishInformation(WallPosterBundle::VK_PROVIDER, $groupPost);
 
-		return $groupPost;
+        return $groupPost;
     }
 
-	/**
-	 * @param Post $post
-	 * @return bool|string
-	 */
-	protected function prepareAttachments(Post $post)
+    /**
+     * {@inheritdoc}
+     */
+    public function edit(Post $post, $id)
+    {
+        if ($this->captchaHandler->isCaptchaRequire() && !$this->captchaHandler->getCaptchaValue()) {
+            return false;
+        }
+
+        //TODO: Fire event before send wall.post request
+
+        $groupPost = $this->makeApiRequest(
+            'wall.edit',
+            [
+                'post_id' => $id,
+                'owner_id' => -$this->groupId,
+                'from_group' => 1,
+                'message' => $post->getMessage().' '.$post->getSocialTagsText(),
+                'attachments' => $this->prepareAttachments($post),
+            ]
+        );
+
+        //TODO: Fire event after send wall.post request
+        $post->addPublishInformation(WallPosterBundle::VK_PROVIDER, $groupPost);
+
+        return $groupPost;
+    }
+
+    /**
+     * @param Post $post
+     * @return bool|string
+     */
+    protected function prepareAttachments(Post $post)
     {
         $attachments = false;
-        if($post->getImages())
-        {
-            $uploadServer = $this->makeApiRequest('photos.getWallUploadServer', array('group_id' => $this->groupId));
+        if ($post->getImages()) {
+            $uploadServer = $this->makeApiRequest('photos.getWallUploadServer', ['group_id' => $this->groupId]);
             $uploadURL = $uploadServer->upload_url;
 
-            $images = array();
-			/** @var PostImage $image */
-            foreach($post->getImages() as $image)
-            {
-		$uploadedPhoto = json_decode($this->request($uploadURL, array('photo' => curl_file_create($image->getFilePath()))));
-                $savedImage = $this->makeApiRequest('photos.saveWallPhoto', array(
-                    'group_id' => $this->groupId,
-                    'photo' => $uploadedPhoto->photo,
-                    'server' => $uploadedPhoto->server,
-                    'hash' => $uploadedPhoto->hash,
-                ));
+            $images = [];
+            /** @var PostImage $image */
+            foreach ($post->getImages() as $image) {
+                $uploadedPhoto = json_decode(
+                    $this->request($uploadURL, ['photo' => curl_file_create($image->getFilePath())])
+                );
+                $savedImage = $this->makeApiRequest(
+                    'photos.saveWallPhoto',
+                    [
+                        'group_id' => $this->groupId,
+                        'photo' => $uploadedPhoto->photo,
+                        'server' => $uploadedPhoto->server,
+                        'hash' => $uploadedPhoto->hash,
+                    ]
+                );
                 $images[] = 'photo'.$savedImage[0]->owner_id.'_'.$savedImage[0]->id;
             }
 
-            $attachments = implode(',',$images);
+            $attachments = implode(',', $images);
         }
 
-        if($post->getLink())
-        {
+        if ($post->getLink()) {
             $attachments .= $attachments ? ','.$post->getLink()->getUrl() : $post->getLink()->getUrl();
         }
 
         return $attachments;
     }
 
-	/**
-	 * @param string $method
-	 * @param array $get
-	 * @param array $post
-	 * @return \stdClass
-	 * @throws VkException
-	 */
-	public function makeApiRequest($method, array $get = array(), array $post = array())
+    /**
+     * @param string $method
+     * @param array  $get
+     * @param array  $post
+     * @return \stdClass
+     * @throws VkException
+     */
+    public function makeApiRequest($method, array $get = [], array $post = [])
     {
-		if($this->captchaHandler->getCaptchaValue())
-		{
-			$get['captcha_sid'] = $this->captchaHandler->getCaptchaSid();
-			$get['captcha_key'] = $this->captchaHandler->getCaptchaValue();
-			$this->captchaHandler->resetCaptchaError();
-		}
+        if ($this->captchaHandler->getCaptchaValue()) {
+            $get['captcha_sid'] = $this->captchaHandler->getCaptchaSid();
+            $get['captcha_key'] = $this->captchaHandler->getCaptchaValue();
+            $this->captchaHandler->resetCaptchaError();
+        }
 
-        $parameters = array();
+        $parameters = [];
         foreach ($get as $param => $value) {
-            $query = $param . '=';
+            $query = $param.'=';
             if (is_array($value)) {
                 $query .= urlencode(implode(',', $value));
             } else {
@@ -146,24 +179,25 @@ class VkProvider extends Provider
 
         $query = implode('&', $parameters);
 
-        $url = self::API_URL . $method . '?' . $query;
-        $result = json_decode($this->request($url,$post));
+        $url = self::API_URL.$method.'?'.$query;
+        $result = json_decode($this->request($url, $post));
 
-        if(isset($result->error))
-        {
-            if($result->error->error_code == 14)
-            {
-				$this->captchaHandler->createCaptcha($result->error->captcha_img, $result->error->captcha_sid);
-                throw new VkException($result->error->error_msg, $result->error->error_code, null, $result->error->captcha_sid, $result->error->captcha_img);
-            }
-            else
-            {
+        if (isset($result->error)) {
+            if ($result->error->error_code == 14) {
+                $this->captchaHandler->createCaptcha($result->error->captcha_img, $result->error->captcha_sid);
+                throw new VkException(
+                    $result->error->error_msg,
+                    $result->error->error_code,
+                    null,
+                    $result->error->captcha_sid,
+                    $result->error->captcha_img
+                );
+            } else {
                 throw new VkException($result->error->error_msg, $result->error->error_code);
             }
         }
 
-        if (isset($result->response))
-        {
+        if (isset($result->response)) {
             return $result->response;
         }
 
